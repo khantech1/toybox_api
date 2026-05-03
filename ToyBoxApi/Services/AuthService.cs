@@ -26,9 +26,9 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        var exists = await _db.Users.AnyAsync(u => u.Email == request.Email.ToLower());
+        var exists = await _db.Users.AnyAsync(u => u.Email == request.Email.ToLower()||u.PhoneNo== request.PhoneNo.ToLower());
         if (exists)
-            throw new InvalidOperationException("An account with this email already exists.");
+            throw new InvalidOperationException("An account with this email or phone number already exists.");
 
         var user = new User
         {
