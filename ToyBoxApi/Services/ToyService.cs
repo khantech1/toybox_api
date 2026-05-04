@@ -36,22 +36,26 @@ public class ToyService : IToyService
             .ToListAsync();
 
         var query = _db.Toys
-            .Include(t => t.Owner)
-            .Include(t => t.Category)
-            .Include(t => t.DesiredCategory)
-            .Include(t => t.Images)
-            .Include(t => t.SharedWith)
-            .Where(t =>
-                t.OwnerUserId != currentUserId &&
-                (
-                    // show toys of contacts
-                    contactUserIds.Contains(t.OwnerUserId)
-
-                    // OR toys specifically shared with current user
-                    || t.SharedWith.Any(s => s.SharedWithUserId == currentUserId)
-                )
+    .Include(t => t.Owner)
+    .Include(t => t.Category)
+    .Include(t => t.DesiredCategory)
+    .Include(t => t.Images)
+    .Include(t => t.SharedWith)
+    .Where(t =>
+        t.OwnerUserId != currentUserId &&
+        (
+            (
+                t.SharedWith.Any() &&
+                t.SharedWith.Any(s => s.SharedWithUserId == currentUserId)
             )
-            .AsQueryable();
+            ||
+            (
+                !t.SharedWith.Any() &&
+                contactUserIds.Contains(t.OwnerUserId)
+            )
+        )
+    )
+    .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
             query = query.Where(t =>
