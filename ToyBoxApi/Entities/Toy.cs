@@ -13,6 +13,10 @@ public class Toy
     [Column("owner_user_id")]
     public int OwnerUserId { get; set; }
 
+    /// <summary>Who physically has the toy. Differs from the owner only during a temporary exchange.</summary>
+    [Column("current_holder_user_id")]
+    public int CurrentHolderUserId { get; set; }
+
     [Required]
     [MaxLength(150)]
     [Column("toy_name")]
@@ -34,9 +38,23 @@ public class Toy
     [Column("value", TypeName = "decimal(10,2)")]
     public decimal? Value { get; set; }
 
+    /// <summary>Listed for exchange in the catalog. Owned-but-unlisted toys only appear in the owner's toys.</summary>
+    [Column("is_listed")]
+    public bool IsListed { get; set; } = true;
+
+    [Timestamp]
+    [Column("row_version")]
+    public byte[] RowVersion { get; set; } = null!;
+
+    [NotMapped]
+    public bool IsOnLoan => CurrentHolderUserId != OwnerUserId;
+
     // Navigation
     [ForeignKey(nameof(OwnerUserId))]
     public User? Owner { get; set; }
+
+    [ForeignKey(nameof(CurrentHolderUserId))]
+    public User? CurrentHolder { get; set; }
 
     [ForeignKey(nameof(CategoryId))]
     public Category? Category { get; set; }
@@ -47,4 +65,7 @@ public class Toy
     public ICollection<ToyImage> Images { get; set; } = new List<ToyImage>();
     public ICollection<SharedToy> SharedWith { get; set; } = new List<SharedToy>();
     public ICollection<ExchangeRequestToy> ExchangeRequestToys { get; set; } = new List<ExchangeRequestToy>();
+    public ICollection<ToyOwnershipHistory> History { get; set; } = new List<ToyOwnershipHistory>();
+    public ICollection<ToyPriority> Priorities { get; set; } = new List<ToyPriority>();
+    public ICollection<ToyGift> Gifts { get; set; } = new List<ToyGift>();
 }

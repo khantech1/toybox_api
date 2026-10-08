@@ -27,20 +27,16 @@ public class ReviewService : IReviewService
             .FirstOrDefaultAsync(r => r.RequestId == request.RequestId)
             ?? throw new KeyNotFoundException("Exchange request not found.");
 
-        if (exchangeRequest.Status != "completed" && exchangeRequest.Status != "accepted")
+        if (exchangeRequest.Status is not ("completed" or "accepted" or "returned"))
             throw new InvalidOperationException("You can only review completed exchanges.");
 
-        // Verify reviewer participated in the request (load toys with owners)
-        var requestWithToys = await _db.ExchangeRequests
-            .Include(r => r.Toys).ThenInclude(rt => rt.Toy)
-            .FirstAsync(r => r.RequestId == request.RequestId);
+        var parties = new[] { exchangeRequest.InitiatorUserId, exchangeRequest.ReceiverUserId };
 
-        var isParticipant =
-            requestWithToys.InitiatorUserId == reviewerUserId ||
-            requestWithToys.Toys.Any(rt => rt.Toy?.OwnerUserId == reviewerUserId);
-
-        if (!isParticipant)
+        if (!parties.Contains(reviewerUserId))
             throw new UnauthorizedAccessException("You did not participate in this exchange.");
+
+        if (!parties.Contains(request.RevieweeUserId))
+            throw new InvalidOperationException("You can only review the other party of this exchange.");
 
         // Prevent reviewing yourself
         if (request.RevieweeUserId == reviewerUserId)

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ToyBoxApi.Data;
 
@@ -11,9 +12,11 @@ using ToyBoxApi.Data;
 namespace ToyBoxApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260926083108_AddValueAtRequestToExchangeRequestToy")]
+    partial class AddValueAtRequestToExchangeRequestToy
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,49 +97,6 @@ namespace ToyBoxApi.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ToyBoxApi.Entities.Child", b =>
-                {
-                    b.Property<int>("ChildId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("child_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChildId"));
-
-                    b.Property<DateOnly>("BirthDate")
-                        .HasColumnType("date")
-                        .HasColumnName("birth_date");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Interests")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("interests");
-
-                    b.Property<bool>("IsVisibleToContacts")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_visible_to_contacts");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("name");
-
-                    b.Property<int>("ParentUserId")
-                        .HasColumnType("int")
-                        .HasColumnName("parent_user_id");
-
-                    b.HasKey("ChildId");
-
-                    b.HasIndex("ParentUserId");
-
-                    b.ToTable("Children");
-                });
-
             modelBuilder.Entity("ToyBoxApi.Entities.Contact", b =>
                 {
                     b.Property<int>("UserId")
@@ -167,52 +127,14 @@ namespace ToyBoxApi.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
 
-                    b.Property<DateTime?>("DueSoonNotifiedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("due_soon_notified_at");
-
-                    b.Property<string>("ExchangeType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("exchange_type");
-
                     b.Property<int>("InitiatorUserId")
                         .HasColumnType("int")
                         .HasColumnName("initiator_user_id");
-
-                    b.Property<DateTime?>("LoanStartedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("loan_started_at");
 
                     b.Property<string>("Message")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("message");
-
-                    b.Property<DateTime?>("OverdueNotifiedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("overdue_notified_at");
-
-                    b.Property<int?>("ReceiverUserId")
-                        .HasColumnType("int")
-                        .HasColumnName("receiver_user_id");
-
-                    b.Property<bool>("ReturnConfirmedByInitiator")
-                        .HasColumnType("bit")
-                        .HasColumnName("return_confirmed_by_initiator");
-
-                    b.Property<bool>("ReturnConfirmedByReceiver")
-                        .HasColumnType("bit")
-                        .HasColumnName("return_confirmed_by_receiver");
-
-                    b.Property<DateTime?>("ReturnDueAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("return_due_at");
-
-                    b.Property<DateTime?>("ReturnedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("returned_at");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -223,8 +145,6 @@ namespace ToyBoxApi.Migrations
                     b.HasKey("RequestId");
 
                     b.HasIndex("InitiatorUserId");
-
-                    b.HasIndex("ReceiverUserId");
 
                     b.ToTable("Exchange_Requests");
                 });
@@ -254,67 +174,6 @@ namespace ToyBoxApi.Migrations
                     b.HasIndex("ToyId");
 
                     b.ToTable("Exchange_Request_Toys");
-                });
-
-            modelBuilder.Entity("ToyBoxApi.Entities.Notification", b =>
-                {
-                    b.Property<int>("NotificationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("notification_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
-
-                    b.Property<int?>("ActorUserId")
-                        .HasColumnType("int")
-                        .HasColumnName("actor_user_id");
-
-                    b.Property<string>("Body")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("body");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<int?>("GiftId")
-                        .HasColumnType("int")
-                        .HasColumnName("gift_id");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_read");
-
-                    b.Property<int?>("RequestId")
-                        .HasColumnType("int")
-                        .HasColumnName("request_id");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("title");
-
-                    b.Property<int?>("ToyId")
-                        .HasColumnType("int")
-                        .HasColumnName("toy_id");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)")
-                        .HasColumnName("type");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("NotificationId");
-
-                    b.HasIndex("UserId", "IsRead", "CreatedAt");
-
-                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("ToyBoxApi.Entities.Review", b =>
@@ -396,28 +255,13 @@ namespace ToyBoxApi.Migrations
                         .HasColumnType("int")
                         .HasColumnName("condition_status");
 
-                    b.Property<int>("CurrentHolderUserId")
-                        .HasColumnType("int")
-                        .HasColumnName("current_holder_user_id");
-
                     b.Property<int?>("DesiredCategoryId")
                         .HasColumnType("int")
                         .HasColumnName("desired_category_id");
 
-                    b.Property<bool>("IsListed")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_listed");
-
                     b.Property<int>("OwnerUserId")
                         .HasColumnType("int")
                         .HasColumnName("owner_user_id");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion")
-                        .HasColumnName("row_version");
 
                     b.Property<string>("ToyDescription")
                         .HasColumnType("nvarchar(max)")
@@ -437,73 +281,11 @@ namespace ToyBoxApi.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("CurrentHolderUserId");
-
                     b.HasIndex("DesiredCategoryId");
 
                     b.HasIndex("OwnerUserId");
 
                     b.ToTable("Toys");
-                });
-
-            modelBuilder.Entity("ToyBoxApi.Entities.ToyGift", b =>
-                {
-                    b.Property<int>("GiftId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("gift_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GiftId"));
-
-                    b.Property<int?>("ChildId")
-                        .HasColumnType("int")
-                        .HasColumnName("child_id");
-
-                    b.Property<string>("ChildName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("child_name");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<int>("FromUserId")
-                        .HasColumnType("int")
-                        .HasColumnName("from_user_id");
-
-                    b.Property<string>("Message")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("message");
-
-                    b.Property<DateTime?>("RespondedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("responded_at");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("status");
-
-                    b.Property<int>("ToUserId")
-                        .HasColumnType("int")
-                        .HasColumnName("to_user_id");
-
-                    b.Property<int>("ToyId")
-                        .HasColumnType("int")
-                        .HasColumnName("toy_id");
-
-                    b.HasKey("GiftId");
-
-                    b.HasIndex("FromUserId");
-
-                    b.HasIndex("ToyId");
-
-                    b.HasIndex("ToUserId", "Status");
-
-                    b.ToTable("Toy_Gifts");
                 });
 
             modelBuilder.Entity("ToyBoxApi.Entities.ToyImage", b =>
@@ -530,75 +312,6 @@ namespace ToyBoxApi.Migrations
                     b.HasIndex("ToyId");
 
                     b.ToTable("Toy_Images");
-                });
-
-            modelBuilder.Entity("ToyBoxApi.Entities.ToyOwnershipHistory", b =>
-                {
-                    b.Property<int>("HistoryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("history_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HistoryId"));
-
-                    b.Property<DateTime?>("EndedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("ended_at");
-
-                    b.Property<int?>("GiftId")
-                        .HasColumnType("int")
-                        .HasColumnName("gift_id");
-
-                    b.Property<int?>("RequestId")
-                        .HasColumnType("int")
-                        .HasColumnName("request_id");
-
-                    b.Property<DateTime>("StartedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("started_at");
-
-                    b.Property<int>("ToyId")
-                        .HasColumnType("int")
-                        .HasColumnName("toy_id");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("type");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("HistoryId");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("ToyId", "EndedAt");
-
-                    b.ToTable("Toy_Ownership_History");
-                });
-
-            modelBuilder.Entity("ToyBoxApi.Entities.ToyPriority", b =>
-                {
-                    b.Property<int>("ToyId")
-                        .HasColumnType("int")
-                        .HasColumnName("toy_id");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.HasKey("ToyId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Toy_Priorities");
                 });
 
             modelBuilder.Entity("ToyBoxApi.Entities.User", b =>
@@ -654,17 +367,6 @@ namespace ToyBoxApi.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ToyBoxApi.Entities.Child", b =>
-                {
-                    b.HasOne("ToyBoxApi.Entities.User", "Parent")
-                        .WithMany()
-                        .HasForeignKey("ParentUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Parent");
-                });
-
             modelBuilder.Entity("ToyBoxApi.Entities.Contact", b =>
                 {
                     b.HasOne("ToyBoxApi.Entities.User", "ContactUser")
@@ -692,14 +394,7 @@ namespace ToyBoxApi.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("ToyBoxApi.Entities.User", "Receiver")
-                        .WithMany()
-                        .HasForeignKey("ReceiverUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("Initiator");
-
-                    b.Navigation("Receiver");
                 });
 
             modelBuilder.Entity("ToyBoxApi.Entities.ExchangeRequestToy", b =>
@@ -719,17 +414,6 @@ namespace ToyBoxApi.Migrations
                     b.Navigation("ExchangeRequest");
 
                     b.Navigation("Toy");
-                });
-
-            modelBuilder.Entity("ToyBoxApi.Entities.Notification", b =>
-                {
-                    b.HasOne("ToyBoxApi.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ToyBoxApi.Entities.Review", b =>
@@ -785,12 +469,6 @@ namespace ToyBoxApi.Migrations
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("ToyBoxApi.Entities.User", "CurrentHolder")
-                        .WithMany()
-                        .HasForeignKey("CurrentHolderUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("ToyBoxApi.Entities.Category", "DesiredCategory")
                         .WithMany("ToysDesiredCategory")
                         .HasForeignKey("DesiredCategoryId");
@@ -803,38 +481,9 @@ namespace ToyBoxApi.Migrations
 
                     b.Navigation("Category");
 
-                    b.Navigation("CurrentHolder");
-
                     b.Navigation("DesiredCategory");
 
                     b.Navigation("Owner");
-                });
-
-            modelBuilder.Entity("ToyBoxApi.Entities.ToyGift", b =>
-                {
-                    b.HasOne("ToyBoxApi.Entities.User", "FromUser")
-                        .WithMany()
-                        .HasForeignKey("FromUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ToyBoxApi.Entities.User", "ToUser")
-                        .WithMany()
-                        .HasForeignKey("ToUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ToyBoxApi.Entities.Toy", "Toy")
-                        .WithMany("Gifts")
-                        .HasForeignKey("ToyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FromUser");
-
-                    b.Navigation("ToUser");
-
-                    b.Navigation("Toy");
                 });
 
             modelBuilder.Entity("ToyBoxApi.Entities.ToyImage", b =>
@@ -846,44 +495,6 @@ namespace ToyBoxApi.Migrations
                         .IsRequired();
 
                     b.Navigation("Toy");
-                });
-
-            modelBuilder.Entity("ToyBoxApi.Entities.ToyOwnershipHistory", b =>
-                {
-                    b.HasOne("ToyBoxApi.Entities.Toy", "Toy")
-                        .WithMany("History")
-                        .HasForeignKey("ToyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ToyBoxApi.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Toy");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ToyBoxApi.Entities.ToyPriority", b =>
-                {
-                    b.HasOne("ToyBoxApi.Entities.Toy", "Toy")
-                        .WithMany("Priorities")
-                        .HasForeignKey("ToyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ToyBoxApi.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Toy");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ToyBoxApi.Entities.Category", b =>
@@ -904,13 +515,7 @@ namespace ToyBoxApi.Migrations
                 {
                     b.Navigation("ExchangeRequestToys");
 
-                    b.Navigation("Gifts");
-
-                    b.Navigation("History");
-
                     b.Navigation("Images");
-
-                    b.Navigation("Priorities");
 
                     b.Navigation("SharedWith");
                 });

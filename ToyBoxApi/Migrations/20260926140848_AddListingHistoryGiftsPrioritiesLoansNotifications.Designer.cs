@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ToyBoxApi.Data;
 
@@ -11,9 +12,11 @@ using ToyBoxApi.Data;
 namespace ToyBoxApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260926140848_AddListingHistoryGiftsPrioritiesLoansNotifications")]
+    partial class AddListingHistoryGiftsPrioritiesLoansNotifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,49 +95,6 @@ namespace ToyBoxApi.Migrations
                             CategoryId = 10,
                             CategoryName = "Arts & Crafts"
                         });
-                });
-
-            modelBuilder.Entity("ToyBoxApi.Entities.Child", b =>
-                {
-                    b.Property<int>("ChildId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("child_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChildId"));
-
-                    b.Property<DateOnly>("BirthDate")
-                        .HasColumnType("date")
-                        .HasColumnName("birth_date");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Interests")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("interests");
-
-                    b.Property<bool>("IsVisibleToContacts")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_visible_to_contacts");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("name");
-
-                    b.Property<int>("ParentUserId")
-                        .HasColumnType("int")
-                        .HasColumnName("parent_user_id");
-
-                    b.HasKey("ChildId");
-
-                    b.HasIndex("ParentUserId");
-
-                    b.ToTable("Children");
                 });
 
             modelBuilder.Entity("ToyBoxApi.Entities.Contact", b =>
@@ -455,15 +415,6 @@ namespace ToyBoxApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GiftId"));
 
-                    b.Property<int?>("ChildId")
-                        .HasColumnType("int")
-                        .HasColumnName("child_id");
-
-                    b.Property<string>("ChildName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("child_name");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
@@ -652,17 +603,6 @@ namespace ToyBoxApi.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("ToyBoxApi.Entities.Child", b =>
-                {
-                    b.HasOne("ToyBoxApi.Entities.User", "Parent")
-                        .WithMany()
-                        .HasForeignKey("ParentUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("ToyBoxApi.Entities.Contact", b =>

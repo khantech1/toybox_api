@@ -12,11 +12,54 @@ namespace ToyBoxApi.Controllers;
 public class ProfileController : ControllerBase
 {
     private readonly IProfileService _profileService;
+    private readonly IToyService _toyService;
+    private readonly IChildService _childService;
 
-    public ProfileController(IProfileService profileService)
+    public ProfileController(IProfileService profileService, IToyService toyService, IChildService childService)
     {
         _profileService = profileService;
+        _toyService     = toyService;
+        _childService   = childService;
     }
+
+    // ── Children ──────────────────────────────────────────────────────────────
+
+    /// <summary>The current user's children.</summary>
+    /// <remarks>GET /api/profile/children</remarks>
+    [HttpGet("children")]
+    public async Task<IActionResult> GetMyChildren() =>
+        Ok(await _childService.GetMineAsync(User.GetUserId()));
+
+    /// <summary>Add a child (name, birth_date yyyy-MM-dd, interests, is_visible_to_contacts).</summary>
+    /// <remarks>POST /api/profile/children</remarks>
+    [HttpPost("children")]
+    public async Task<IActionResult> AddChild([FromBody] SaveChildRequest request) =>
+        StatusCode(201, await _childService.CreateAsync(User.GetUserId(), request));
+
+    /// <remarks>PUT /api/profile/children/{childId}</remarks>
+    [HttpPut("children/{childId:int}")]
+    public async Task<IActionResult> UpdateChild(int childId, [FromBody] SaveChildRequest request) =>
+        Ok(await _childService.UpdateAsync(User.GetUserId(), childId, request));
+
+    /// <remarks>DELETE /api/profile/children/{childId}</remarks>
+    [HttpDelete("children/{childId:int}")]
+    public async Task<IActionResult> DeleteChild(int childId)
+    {
+        await _childService.DeleteAsync(User.GetUserId(), childId);
+        return NoContent();
+    }
+
+    /// <summary>A user's children that the caller may see (the parent must have the caller in contacts).</summary>
+    /// <remarks>GET /api/profile/{userId}/children</remarks>
+    [HttpGet("{userId:int}/children")]
+    public async Task<IActionResult> GetUserChildren(int userId) =>
+        Ok(await _childService.GetForParentAsync(User.GetUserId(), userId));
+
+    /// <summary>Upcoming birthdays of contacts' children, soonest first.</summary>
+    /// <remarks>GET /api/contacts/birthdays?days=30</remarks>
+    [HttpGet("/api/contacts/birthdays")]
+    public async Task<IActionResult> GetUpcomingBirthdays([FromQuery] int days = 30) =>
+        Ok(await _childService.GetUpcomingBirthdaysAsync(User.GetUserId(), days));
 
     /// <summary>Get the authenticated user's own profile.</summary>
     /// <remarks>GET /api/profile</remarks>
@@ -28,20 +71,22 @@ public class ProfileController : ControllerBase
         return Ok(user);
     }
 
-    /// <summary>Get any user's public profile by ID.</summary>
+    /// <summary>Get a user's profile. Email and phone are only included for contacts.</summary>
     /// <remarks>GET /api/profile/{userId}</remarks>
     [HttpGet("{userId:int}")]
     public async Task<IActionResult> GetById(int userId)
     {
-        try
-        {
-            var user = await _profileService.GetByIdAsync(userId);
-            return Ok(user);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
+        var user = await _profileService.GetByIdAsync(User.GetUserId(), userId);
+        return Ok(user);
+    }
+
+    /// <summary>Toys owned by a user that the caller is allowed to see (listed and unlisted).</summary>
+    /// <remarks>GET /api/profile/{userId}/toys</remarks>
+    [HttpGet("{userId:int}/toys")]
+    public async Task<IActionResult> GetUserToys(int userId)
+    {
+        var toys = await _toyService.GetUserToysAsync(User.GetUserId(), userId);
+        return Ok(toys);
     }
 
     /// <summary>Update the current user's profile (name, address).</summary>

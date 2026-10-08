@@ -14,10 +14,40 @@ public class ToyDto
     public int? DesiredCategoryId { get; set; }
     public int? ConditionStatus { get; set; }
     public decimal? Value { get; set; }
+    public bool IsListed { get; set; }
+    public int CurrentHolderUserId { get; set; }
+    public bool IsOnLoan { get; set; }
     public ToyOwnerDto? Owner { get; set; }
+    public ToyOwnerDto? CurrentHolder { get; set; }
     public CategoryDto? Category { get; set; }
     public CategoryDto? DesiredCategory { get; set; }
     public List<ToyImageDto> Images { get; set; } = new();
+
+    // Populated on detail / catalog views only.
+    public int? PriorityCount { get; set; }
+    public bool? IsPrioritizedByMe { get; set; }
+    public bool? HasPendingGift { get; set; }
+}
+
+public class OwnershipHistoryDto
+{
+    public int HistoryId { get; set; }
+    public string Type { get; set; } = string.Empty;
+    public ToyOwnerDto? User { get; set; }
+    public int? RequestId { get; set; }
+    public int? GiftId { get; set; }
+    public DateTime StartedAt { get; set; }
+    public DateTime? EndedAt { get; set; }
+}
+
+public class PriorityQueueEntryDto
+{
+    public int Position { get; set; }
+    public ToyOwnerDto User { get; set; } = null!;
+    public DateTime CreatedAt { get; set; }
+
+    /// <summary>True when the toy owner has this user in their contacts (i.e. can gift to them).</summary>
+    public bool IsContact { get; set; }
 }
 
 public class ToyOwnerDto
@@ -64,6 +94,15 @@ public class CreateToyRequest
     public bool VisibleToAll { get; set; } = true;
 
     public List<int>? VisibleToUserIds { get; set; }
+
+    /// <summary>false = just add to my toys, true = also list for exchange.</summary>
+    public bool IsListed { get; set; } = true;
+}
+
+public class SetListingRequest
+{
+    [Required]
+    public bool IsListed { get; set; }
 }
 
 public class UpdateToyRequest
@@ -86,6 +125,8 @@ public class UpdateToyRequest
     public bool? VisibleToAll { get; set; }
 
     public List<int>? VisibleToUserIds { get; set; }
+
+    public bool? IsListed { get; set; }
 }
 
 public class ToyListResponse

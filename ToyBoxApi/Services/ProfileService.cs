@@ -9,7 +9,7 @@ namespace ToyBoxApi.Services;
 public interface IProfileService
 {
     Task<UserDto> GetMeAsync(int userId);
-    Task<UserDto> GetByIdAsync(int userId);
+    Task<UserDto> GetByIdAsync(int viewerId, int userId);
     Task<UserDto> UpdateAsync(int userId, UpdateProfileRequest request);
     Task<UserDto> UploadProfilePicAsync(int userId, IFormFile file);
     Task<List<ContactDto>> GetContactsAsync(int userId);
@@ -36,11 +36,24 @@ public class ProfileService : IProfileService
         return AuthService.MapToDto(user);
     }
 
-    public async Task<UserDto> GetByIdAsync(int userId)
+    public async Task<UserDto> GetByIdAsync(int viewerId, int userId)
     {
         var user = await _db.Users.FindAsync(userId)
             ?? throw new KeyNotFoundException("User not found.");
-        return AuthService.MapToDto(user);
+
+        var dto = AuthService.MapToDto(user);
+
+        var linked = viewerId == userId || await _db.Contacts.AnyAsync(c =>
+            (c.UserId == viewerId && c.ContactId == userId) ||
+            (c.UserId == userId && c.ContactId == viewerId));
+
+        if (!linked)
+        {
+            dto.Email   = null;
+            dto.PhoneNo = null;
+        }
+
+        return dto;
     }
 
     public async Task<UserDto> UpdateAsync(int userId, UpdateProfileRequest request)

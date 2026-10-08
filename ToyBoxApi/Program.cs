@@ -122,6 +122,11 @@ builder.Services.AddScoped<IToyService,             ToyService>();
 builder.Services.AddScoped<IExchangeRequestService, ExchangeRequestService>();
 builder.Services.AddScoped<IReviewService,          ReviewService>();
 builder.Services.AddScoped<IProfileService,         ProfileService>();
+builder.Services.AddScoped<INotificationService,    NotificationService>();
+builder.Services.AddScoped<IToyTransferService,     ToyTransferService>();
+builder.Services.AddScoped<IGiftService,            GiftService>();
+builder.Services.AddScoped<IChildService,           ChildService>();
+builder.Services.AddHostedService<LoanReminderService>();
 
 // ── Build ─────────────────────────────────────────────────────────────────────
 var app = builder.Build();

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ToyBoxApi.Entities;
 
 namespace ToyBoxApi.Data;
@@ -16,6 +17,11 @@ public class AppDbContext : DbContext
     public DbSet<ExchangeRequest> ExchangeRequests => Set<ExchangeRequest>();
     public DbSet<ExchangeRequestToy> ExchangeRequestToys => Set<ExchangeRequestToy>();
     public DbSet<Review> Reviews => Set<Review>();
+    public DbSet<ToyOwnershipHistory> ToyOwnershipHistory => Set<ToyOwnershipHistory>();
+    public DbSet<ToyGift> ToyGifts => Set<ToyGift>();
+    public DbSet<ToyPriority> ToyPriorities => Set<ToyPriority>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<Child> Children => Set<Child>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +54,84 @@ public class AppDbContext : DbContext
              .WithMany(u => u.Toys)
              .HasForeignKey(t => t.OwnerUserId)
              .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(t => t.CurrentHolder)
+             .WithMany()
+             .HasForeignKey(t => t.CurrentHolderUserId)
+             .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ── Ownership history ────────────────────────────────────────────────
+        modelBuilder.Entity<ToyOwnershipHistory>(e =>
+        {
+            e.HasOne(h => h.Toy)
+             .WithMany(t => t.History)
+             .HasForeignKey(h => h.ToyId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(h => h.User)
+             .WithMany()
+             .HasForeignKey(h => h.UserId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasIndex(h => new { h.ToyId, h.EndedAt });
+        });
+
+        // ── Gifts ────────────────────────────────────────────────────────────
+        modelBuilder.Entity<ToyGift>(e =>
+        {
+            e.HasOne(g => g.Toy)
+             .WithMany(t => t.Gifts)
+             .HasForeignKey(g => g.ToyId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(g => g.FromUser)
+             .WithMany()
+             .HasForeignKey(g => g.FromUserId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasOne(g => g.ToUser)
+             .WithMany()
+             .HasForeignKey(g => g.ToUserId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasIndex(g => new { g.ToUserId, g.Status });
+        });
+
+        // ── Priorities (composite PK) ────────────────────────────────────────
+        modelBuilder.Entity<ToyPriority>(e =>
+        {
+            e.HasOne(p => p.Toy)
+             .WithMany(t => t.Priorities)
+             .HasForeignKey(p => p.ToyId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(p => p.User)
+             .WithMany()
+             .HasForeignKey(p => p.UserId)
+             .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ── Children ─────────────────────────────────────────────────────────
+        modelBuilder.Entity<Child>(e =>
+        {
+            e.HasOne(c => c.Parent)
+             .WithMany()
+             .HasForeignKey(c => c.ParentUserId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(c => c.ParentUserId);
+        });
+
+        // ── Notifications ────────────────────────────────────────────────────
+        modelBuilder.Entity<Notification>(e =>
+        {
+            e.HasOne(n => n.User)
+             .WithMany()
+             .HasForeignKey(n => n.UserId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasIndex(n => new { n.UserId, n.IsRead, n.CreatedAt });
         });
 
         // ── Contact (composite PK) ────────────────────────────────────────────
@@ -84,6 +168,11 @@ public class AppDbContext : DbContext
             e.HasOne(r => r.Initiator)
              .WithMany(u => u.InitiatedRequests)
              .HasForeignKey(r => r.InitiatorUserId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasOne(r => r.Receiver)
+             .WithMany()
+             .HasForeignKey(r => r.ReceiverUserId)
              .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -125,6 +214,22 @@ public class AppDbContext : DbContext
             // One reviewer can only submit one review per request
             e.HasIndex(r => new { r.RequestId, r.ReviewerUserId }).IsUnique();
         });
+
+        // ── All timestamps are stored as UTC ─────────────────────────────────
+        // SQL Server drops DateTimeKind; restore it on read so JSON carries a "Z".
+        var utc = new ValueConverter<DateTime, DateTime>(
+            v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+            v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+        var utcNullable = new ValueConverter<DateTime?, DateTime?>(
+            v => v.HasValue ? (v.Value.Kind == DateTimeKind.Utc ? v : v.Value.ToUniversalTime()) : v,
+            v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
+
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        foreach (var prop in entity.GetProperties())
+        {
+            if (prop.ClrType == typeof(DateTime)) prop.SetValueConverter(utc);
+            else if (prop.ClrType == typeof(DateTime?)) prop.SetValueConverter(utcNullable);
+        }
 
         // ── Seed categories ───────────────────────────────────────────────────
         modelBuilder.Entity<Category>().HasData(

@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace ToyBoxApi.Middleware;
 
@@ -33,7 +34,11 @@ public class ExceptionMiddleware
 
         var (statusCode, message) = ex switch
         {
-            UnauthorizedAccessException => (HttpStatusCode.Unauthorized, ex.Message),
+            // Authentication failures are handled by the JWT middleware (401);
+            // this exception means "authenticated but not allowed".
+            UnauthorizedAccessException => (HttpStatusCode.Forbidden,    ex.Message),
+            DbUpdateConcurrencyException => (HttpStatusCode.Conflict,
+                                            "This item was changed by someone else. Please refresh and try again."),
             KeyNotFoundException        => (HttpStatusCode.NotFound,     ex.Message),
             InvalidOperationException   => (HttpStatusCode.BadRequest,   ex.Message),
             ArgumentException           => (HttpStatusCode.BadRequest,   ex.Message),

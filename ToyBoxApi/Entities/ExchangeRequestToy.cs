@@ -20,6 +20,10 @@ public class ExchangeRequestToy
     [Column("exchange_role")]
     public string ExchangeRole { get; set; } = string.Empty;
 
+    /// <summary>Snapshot of the toy's estimated value at the time the request was created.</summary>
+    [Column("value_at_request", TypeName = "decimal(10,2)")]
+    public decimal? ValueAtRequest { get; set; }
+
     [ForeignKey(nameof(RequestId))]
     public ExchangeRequest? ExchangeRequest { get; set; }
 
